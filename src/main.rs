@@ -45,13 +45,15 @@ fn is_ts_file(entry: &DirEntry) -> bool {
 
 fn fix_file(dir_entry : &DirEntry ) {
     let filename: String = dir_entry.path().to_str().expect("couldn't get file name").to_string();
-    let file: File = File::open(filename.clone()).expect("couldn't open file");
 
 
     let mut contents = String::new();
     let mut new_contents = String::new();
     let mut newer_contents = String::new();
-        let mut buf_reader = BufReader::new(file);
+    {
+        let mut file: File = OpenOptions::new().read(true).open(&filename).unwrap();
+
+        let mut buf_reader = BufReader::new(&file);
         match buf_reader.read_to_string(&mut contents) {
             Ok(_) => {},
             Err(e) => println!("couldn't read the file {} because {}", filename, e)
@@ -77,14 +79,12 @@ fn fix_file(dir_entry : &DirEntry ) {
         }
         let _ = newer_contents.pop();
         // println!("{}", newer_contents);
-
-
-    let mut file: File = File::open(filename).expect("couldn't open file");
-    let buffer = &newer_contents.into_bytes()[..];
-    let mut f = BufWriter::new(file);
-    match f.write_all(&buffer) {
-        Ok(_) => {},
-        Err(e) => println!("{}", e)
     }
+    let mut file: File = OpenOptions::new().write(true).truncate(true).open(&filename).unwrap();
+
+    // let mut file: File = OpenOptions::new().write(true).open(filename).unwrap();
+    let buffer = &newer_contents.into_bytes()[..];
+    file.set_len(0);//truncate the file to 0 letgth, so it can be overwritten later
+    file.write_all(buffer);
 
 }
