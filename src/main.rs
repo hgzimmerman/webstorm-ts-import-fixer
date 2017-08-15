@@ -74,7 +74,6 @@ fn fix_file(dir_entry : &DirEntry ) {
             let replacement = replace_quotes_regex.replace_all(line, "import $c from '$q'");
             let str_with_newline = format!("{}{}", &replacement, "\n");
             newer_contents.push_str(str_with_newline.as_str());
-            println!("{}",line);
         }
         let _ = newer_contents.pop();
         // println!("{}", newer_contents);
