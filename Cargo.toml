@@ -1,0 +1,8 @@
+[package]
+name = "webstorm-ts-import-defucker"
+version = "0.1.0"
+authors = ["Henry Zimmerman <hzimmerman@ocient.com>"]
+
+[dependencies]
+regex = "0.2"
+walkdir = "1"
