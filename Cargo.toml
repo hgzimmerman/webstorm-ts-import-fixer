@@ -5,4 +5,3 @@ authors = ["Henry Zimmerman <hzimmerman@ocient.com>"]
 
 [dependencies]
 regex = "0.2"
-walkdir = "1"
