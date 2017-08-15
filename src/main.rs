@@ -1,5 +1,4 @@
 extern crate regex;
-extern crate walkdir;
 
 use regex::Regex;
 
@@ -10,6 +9,7 @@ use std::io::BufReader;
 use std::path::Path;
 use std::io;
 use std::fs::OpenOptions;
+use std::io::{Write, BufWriter};
 
 fn main() {
 
@@ -51,7 +51,6 @@ fn fix_file(dir_entry : &DirEntry ) {
     let mut contents = String::new();
     let mut new_contents = String::new();
     let mut newer_contents = String::new();
-    {
         let mut buf_reader = BufReader::new(file);
         match buf_reader.read_to_string(&mut contents) {
             Ok(_) => {},
@@ -75,16 +74,18 @@ fn fix_file(dir_entry : &DirEntry ) {
             let replacement = replace_quotes_regex.replace_all(line, "import $c from '$q'");
             let str_with_newline = format!("{}{}", &replacement, "\n");
             newer_contents.push_str(str_with_newline.as_str());
+            println!("{}",line);
         }
         let _ = newer_contents.pop();
         // println!("{}", newer_contents);
-    }
 
-    let mut file: File = OpenOptions::new().write(true).open( dir_entry.path().to_str().expect("couldn't get file name") ).expect("couldn't open file");
-    match file.write_all(&newer_contents.into_bytes()) {
+
+    let mut file: File = File::open(filename).expect("couldn't open file");
+    let buffer = &newer_contents.into_bytes()[..];
+    let mut f = BufWriter::new(file);
+    match f.write_all(&buffer) {
         Ok(_) => {},
         Err(e) => println!("{}", e)
     }
-    let _ = file.sync_all();
 
 }
