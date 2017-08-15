@@ -9,7 +9,7 @@ use std::io::BufReader;
 use std::path::Path;
 use std::io;
 use std::fs::OpenOptions;
-use std::io::{Write, BufWriter};
+use std::io::{Write};
 
 fn main() {
 
@@ -26,11 +26,10 @@ fn visit_dirs(dir: &Path, cb: &Fn(&DirEntry)) -> io::Result<()> {
             let path = entry.path();
             if path.is_dir() {
                 visit_dirs(&path, cb)?;
-            } else  {
-                if is_ts_file(&entry) {
-                    cb(&entry);
-                }
+            } else if is_ts_file(&entry) {
+                cb(&entry);
             }
+
         }
     }
     Ok(())
@@ -55,7 +54,7 @@ fn fix_file(dir_entry : &DirEntry ) {
     let mut new_contents = String::new();
     let mut newer_contents = String::new();
     {
-        let mut file: File = OpenOptions::new().read(true).open(&filename).unwrap();
+        let file: File = OpenOptions::new().read(true).open(&filename).unwrap();
 
         let mut buf_reader = BufReader::new(&file);
         match buf_reader.read_to_string(&mut contents) {
@@ -82,13 +81,10 @@ fn fix_file(dir_entry : &DirEntry ) {
             newer_contents.push_str(str_with_newline.as_str());
         }
         let _ = newer_contents.pop();
-        // println!("{}", newer_contents);
     }
     let mut file: File = OpenOptions::new().write(true).truncate(true).open(&filename).unwrap();
 
-    // let mut file: File = OpenOptions::new().write(true).open(filename).unwrap();
     let buffer = &newer_contents.into_bytes()[..];
-    // file.set_len(0);//truncate the file to 0 letgth, so it can be overwritten later
-    file.write_all(buffer);
+    let _ = file.write_all(buffer);
 
 }
