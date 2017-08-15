@@ -88,7 +88,7 @@ fn fix_file(dir_entry : &DirEntry ) {
 
     // let mut file: File = OpenOptions::new().write(true).open(filename).unwrap();
     let buffer = &newer_contents.into_bytes()[..];
-    file.set_len(0);//truncate the file to 0 letgth, so it can be overwritten later
+    // file.set_len(0);//truncate the file to 0 letgth, so it can be overwritten later
     file.write_all(buffer);
 
 }
