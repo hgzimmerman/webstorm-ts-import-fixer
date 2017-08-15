@@ -45,7 +45,7 @@ fn is_ts_file(entry: &DirEntry) -> bool {
 
 fn fix_file(dir_entry : &DirEntry ) {
     let filename: String = dir_entry.path().to_str().expect("couldn't get file name").to_string();
-    let mut file: File = File::open(filename.clone()).expect("couldn't open file");
+    let file: File = File::open(filename.clone()).expect("couldn't open file");
 
 
     let mut contents = String::new();
@@ -66,6 +66,7 @@ fn fix_file(dir_entry : &DirEntry ) {
             let str_with_newline = format!("{}{}", &replacement, "\n");
             new_contents.push_str(str_with_newline.as_str());
         }
+        let _ = new_contents.pop();
 
         // fixes the quotation marks to be '' instead of ""
         let replace_quotes_regex: Regex = Regex::new( r###"import (?P<c>.*) from "(?P<q>.*)".*"### ).unwrap();
@@ -75,6 +76,7 @@ fn fix_file(dir_entry : &DirEntry ) {
             let str_with_newline = format!("{}{}", &replacement, "\n");
             newer_contents.push_str(str_with_newline.as_str());
         }
+        let _ = newer_contents.pop();
         // println!("{}", newer_contents);
     }
 
