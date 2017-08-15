@@ -29,7 +29,6 @@ fn visit_dirs(dir: &Path, cb: &Fn(&DirEntry)) -> io::Result<()> {
             } else if is_ts_file(&entry) {
                 cb(&entry);
             }
-
         }
     }
     Ok(())
@@ -37,10 +36,12 @@ fn visit_dirs(dir: &Path, cb: &Fn(&DirEntry)) -> io::Result<()> {
 
 fn is_ts_file(entry: &DirEntry) -> bool {
     //We don't want to clobber the node_modules directory
-    if entry.file_name().to_str().unwrap().contains("node_modules") {
+    let file_path = entry.file_name().to_str().unwrap().to_string();
+    if file_path.contains("node_modules") || file_path.contains("typings") {
         return false
     }
-    if entry.file_name().to_str().unwrap().contains(".ts") {
+    if file_path.contains(".ts") {
+        println!("{}", file_path);
         return true
     }
     false
