@@ -37,6 +37,10 @@ fn visit_dirs(dir: &Path, cb: &Fn(&DirEntry)) -> io::Result<()> {
 }
 
 fn is_ts_file(entry: &DirEntry) -> bool {
+    //We don't want to clobber the node_modules directory
+    if entry.file_name().to_str().unwrap().contains("node_modules") {
+        return false
+    }
     if entry.file_name().to_str().unwrap().contains(".ts") {
         return true
     }

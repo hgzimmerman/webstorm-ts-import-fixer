@@ -1,5 +1,5 @@
 [package]
-name = "webstorm-ts-import-defucker"
+name = "webstorm-ts-import-fixer"
 version = "0.1.0"
 authors = ["Henry Zimmerman <hzimmerman@ocient.com>"]
 
