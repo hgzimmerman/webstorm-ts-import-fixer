@@ -77,7 +77,7 @@ fn fix_file(dir_entry : &DirEntry ) {
         let replace_quotes_regex: Regex = Regex::new( r###"import (?P<c>.*) from "(?P<q>.*)".*"### ).unwrap();
         let lines = new_contents.split("\n");
         for line in lines {
-            let replacement = replace_quotes_regex.replace_all(line, "import $c from '$q'");
+            let replacement = replace_quotes_regex.replace_all(line, "import $c from '$q';");
             let str_with_newline = format!("{}{}", &replacement, "\n");
             newer_contents.push_str(str_with_newline.as_str());
         }
