@@ -69,7 +69,7 @@ fn fix_file(dir_entry : &DirEntry ) {
       }
     let mut file: File = OpenOptions::new().write(true).truncate(true).open(&filename).unwrap();
 
-    let buffer = &new_contents.into_bytes()[..];
+    let buffer: &[u8] = &new_contents.into_bytes()[..];
     let _ = file.write_all(buffer);
 
 }
