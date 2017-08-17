@@ -4,7 +4,7 @@ Brings ts files that have use idea's autoimport feature in line with the rest of
 It will recurse into the project's directory structure, altering any .ts file with "nonstandard" imports. Converting
 * `import {Namespace} from 'file/path'` to `import { Namespace } from 'file/path'`.
 * `import { Namespace } from "file/path"` to `import { Namespace } from 'file/path'`. 
-
+And moving entries in or after the logging section into the normal import section.
 
 # Install
 * Install rust `curl https://sh.rustup.rs -sSf | sh`.
