@@ -124,7 +124,6 @@ fn promote_imports_out_of_logging(file_contents: String) -> String {
 
         }
     }
-    println!("{}", has_found_logger);
     let _ = new_contents.pop();
     new_contents
 }
