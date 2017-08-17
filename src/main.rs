@@ -105,7 +105,7 @@ fn fix_quotes(file_contents: String) -> String {
 fn promote_imports_out_of_logging(file_contents: String) -> String {
     let mut new_contents = String::new();
     let mut has_found_logger: bool = false;
-    let any_import_regex: Regex = Regex::new(r"import.*from.*;").unwrap();
+    let any_import_regex: Regex = Regex::new(r"^import.*from.*;").unwrap();
     let logging_import_regex: Regex = Regex::new(r"import \{.*\}.*from.*logger/xgLog2.*").unwrap();
     let lines = file_contents.split("\n");
     for line in lines {
