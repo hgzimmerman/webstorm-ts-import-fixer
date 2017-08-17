@@ -53,7 +53,6 @@ fn fix_file(dir_entry : &DirEntry ) {
 
     let mut contents = String::new();
     let mut new_contents = String::new();
-    let mut newer_contents = String::new();
     {
         let file: File = OpenOptions::new().read(true).open(&filename).unwrap();
 
@@ -63,29 +62,69 @@ fn fix_file(dir_entry : &DirEntry ) {
             Err(e) => println!("couldn't read the file {} because {}", filename, e)
         }
 
-        // fixes the spacing between the imported namespace
-        let no_space_import_regex: Regex = Regex::new(r"import \{(?P<y>\S.*\S)\} from (?P<i>.*)").unwrap();
-        let lines = contents.split("\n");
-        for line in lines {
-            let replacement = no_space_import_regex.replace_all(line, "import { $y } from $i");
-            let str_with_newline = format!("{}{}", &replacement, "\n");
-            new_contents.push_str(str_with_newline.as_str());
-        }
-        let _ = new_contents.pop();
+        new_contents = fix_namespace_spacing(contents);
+        new_contents = fix_quotes(new_contents);
+        new_contents = promote_imports_out_of_logging(new_contents);
 
-        // fixes the quotation marks to be '' instead of ""
-        let replace_quotes_regex: Regex = Regex::new( r###"import (?P<c>.*) from "(?P<q>.*)".*"### ).unwrap();
-        let lines = new_contents.split("\n");
-        for line in lines {
-            let replacement = replace_quotes_regex.replace_all(line, "import $c from '$q';");
-            let str_with_newline = format!("{}{}", &replacement, "\n");
-            newer_contents.push_str(str_with_newline.as_str());
-        }
-        let _ = newer_contents.pop();
-    }
+      }
     let mut file: File = OpenOptions::new().write(true).truncate(true).open(&filename).unwrap();
 
-    let buffer = &newer_contents.into_bytes()[..];
+    let buffer = &new_contents.into_bytes()[..];
     let _ = file.write_all(buffer);
 
+}
+
+fn fix_namespace_spacing(file_contents: String) -> String {
+    // fixes the spacing between the imported namespace
+    let mut new_contents = String::new();
+    let no_space_import_regex: Regex = Regex::new(r"import \{(?P<y>\S.*\S)\} from (?P<i>.*)").unwrap();
+    let lines = file_contents.split("\n");
+    for line in lines {
+        let replacement = no_space_import_regex.replace_all(line, "import { $y } from $i");
+        let str_with_newline = format!("{}{}", &replacement, "\n");
+        new_contents.push_str(str_with_newline.as_str());
+    }
+    let _ = new_contents.pop();// pop off the last \n
+    new_contents
+}
+
+fn fix_quotes(file_contents: String) -> String {
+      // fixes the quotation marks to be '' instead of ""
+    let mut new_contents = String::new();
+    let replace_quotes_regex: Regex = Regex::new( r###"import (?P<c>.*) from "(?P<q>.*)".*"### ).unwrap();
+    let lines = file_contents.split("\n");
+    for line in lines {
+        let replacement = replace_quotes_regex.replace_all(line, "import $c from '$q';");
+        let str_with_newline = format!("{}{}", &replacement, "\n");
+        new_contents.push_str(str_with_newline.as_str());
+    }
+    let _ = new_contents.pop();
+    new_contents
+}
+
+fn promote_imports_out_of_logging(file_contents: String) -> String {
+    let mut new_contents = String::new();
+    let mut has_found_logger: bool = false;
+    let any_import_regex: Regex = Regex::new(r"import.*from.*;").unwrap();
+    let logging_import_regex: Regex = Regex::new(r"import.*from.*logger/xgLog2.*").unwrap();
+    let lines = file_contents.split("\n");
+    for line in lines {
+        if has_found_logger {
+            if any_import_regex.is_match(line) {
+                // promote the import
+                new_contents = [line, "\n", new_contents.as_str()].concat();
+            } else {
+                new_contents.push_str([line, "\n"].concat().as_str());
+            }
+        } else {
+            if logging_import_regex.is_match(line) {
+                has_found_logger = true;
+            }
+            new_contents.push_str([line, "\n"].concat().as_str());
+
+        }
+    }
+    println!("{}", has_found_logger);
+    let _ = new_contents.pop();
+    new_contents
 }
