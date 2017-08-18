@@ -1,5 +1,7 @@
 extern crate regex;
+extern crate clap;
 
+use clap::{Arg, App};
 use regex::Regex;
 
 use std::fs::{File, DirEntry};
@@ -13,20 +15,47 @@ use std::io::{Write};
 
 fn main() {
 
+
+    let matches = App::new("webstorm-ts-import-fixer")
+        .version("0.1.0")
+        .author("Henry Zimmerman")
+        .about("Fixes imports that webstorm created.")
+        .arg(Arg::with_name("ignore")
+            .short("i")
+            .long("ignore")
+            .value_name("REGEX")
+            .help("A regex of all file paths to ignore")
+            .takes_value(true)
+            .required(false)
+            )
+        .get_matches();
+
+
     let starting_path: &Path = Path::new(".");
-    let _ = visit_dirs(starting_path, &fix_file);
+
+    let regex: Option<Regex> = match  matches.value_of("ignore") {
+        Some(regex_string) => {
+            match Regex::new(regex_string) {
+                Ok(valid_regex) => Some(valid_regex),
+                Err(e) => panic!("{}", e)
+            }
+        }
+        None => None
+    };
+
+    let _ = visit_dirs(starting_path, &fix_file, &regex);
 
 }
 
 
-fn visit_dirs(dir: &Path, cb: &Fn(&DirEntry)) -> io::Result<()> {
+fn visit_dirs(dir: &Path, cb: &Fn(&DirEntry), optional_regex: &Option<Regex>) -> io::Result<()> {
     if dir.is_dir() {
         for entry in fs::read_dir(dir)? {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                visit_dirs(&path, cb)?;
-            } else if is_ts_file(&entry) {
+                visit_dirs(&path, cb, optional_regex)?;
+            } else if is_ts_file(&entry, optional_regex) {
                 cb(&entry);
             }
         }
@@ -34,12 +63,27 @@ fn visit_dirs(dir: &Path, cb: &Fn(&DirEntry)) -> io::Result<()> {
     Ok(())
 }
 
-fn is_ts_file(entry: &DirEntry) -> bool {
+fn is_ts_file(entry: &DirEntry, optional_regex: &Option<Regex>) -> bool {
     //We don't want to clobber the node_modules directory
     let file_path = entry.path().to_str().unwrap().to_string();
-    if file_path.contains("node_modules") || file_path.contains("typings") {
-        return false
+
+    // If the regex is provided, filter based on the regex, otherwise, fall back to ignoring
+    // node_modules and typings
+    match *optional_regex {
+        Some(ref regex) => {
+            if regex.is_match(file_path.as_str()) {
+                return false
+            }
+
+        },
+        None => {
+            if file_path.contains("node_modules") || file_path.contains("typings") {
+                return false
+            }
+        }
     }
+
+
     if file_path.contains(".ts") {
         println!("{}", file_path);
         return true

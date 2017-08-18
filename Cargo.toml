@@ -5,3 +5,4 @@ authors = ["Henry Zimmerman <hzimmerman@ocient.com>"]
 
 [dependencies]
 regex = "0.2"
+clap = "2.26.0"
