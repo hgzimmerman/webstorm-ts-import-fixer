@@ -19,12 +19,12 @@ fn main() {
     let matches = App::new("webstorm-ts-import-fixer")
         .version("0.1.0")
         .author("Henry Zimmerman")
-        .about("Fixes imports that webstorm created.")
+        .about("Fixes imports that webstorm created. It will recursively search from the directory where it was called, altering all files that it detects as '.ts' files if needed, in valid directories.")
         .arg(Arg::with_name("ignore")
             .short("i")
             .long("ignore")
             .value_name("REGEX")
-            .help("A regex of all file paths to ignore")
+            .help("A regex of all file paths to ignore. By default, this will ignore node_modules/ and typings/ directories.")
             .takes_value(true)
             .required(false)
             )
@@ -77,7 +77,7 @@ fn is_ts_file(entry: &DirEntry, optional_regex: &Option<Regex>) -> bool {
 
         },
         None => {
-            if file_path.contains("node_modules") || file_path.contains("typings") {
+            if file_path.contains("node_modules/") || file_path.contains("typings/") {
                 return false
             }
         }
