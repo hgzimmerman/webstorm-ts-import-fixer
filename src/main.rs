@@ -12,6 +12,7 @@ use std::path::Path;
 use std::io;
 use std::fs::OpenOptions;
 use std::io::{Write};
+use std::process;
 
 fn main() {
 
@@ -37,7 +38,11 @@ fn main() {
         Some(regex_string) => {
             match Regex::new(regex_string) {
                 Ok(valid_regex) => Some(valid_regex),
-                Err(e) => panic!("{}", e)
+                Err(e) => {
+                    eprintln!("{}", e);
+                    eprintln!("Please input a valid regex.");
+                    process::exit(1)
+                }
             }
         }
         None => None
